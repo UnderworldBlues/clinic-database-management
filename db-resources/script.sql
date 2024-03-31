@@ -2,21 +2,23 @@ CREATE DATABASE clinicDB;
 USE clinicDB;
 
 CREATE TABLE employee (
-	id INT AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     empName VARCHAR(20) NOT NULL,
     salary FLOAT NOT NULL,
     birthdate DATE NOT NULL,
-    hiringdate DATE NOT NULL
+    hiringdate DATE NOT NULL,
+    email VARCHAR(320) NOT NULL
 );
 
 CREATE TABLE client(
-	clientID INT AUTO_INCREMENT PRIMARY KEY,
+    clientID INT AUTO_INCREMENT PRIMARY KEY,
     clientName VARCHAR(20) NOT NULL,
-    birthdate DATE NOT NULL
+    birthdate DATE NOT NULL,
+    phone VARCHAR(15) NOT NULL
 );
 
 CREATE TABLE doctor (
-	CRM INT PRIMARY KEY,
+    CRM INT PRIMARY KEY,
     specialty VARCHAR(20) NOT NULL,
     empID INT NOT NULL,
     CONSTRAINT empID FOREIGN KEY (empID) REFERENCES employee(id)
@@ -25,7 +27,7 @@ CREATE TABLE doctor (
 );
 
 CREATE TABLE nurse (
-	RN INT PRIMARY KEY,
+    RN INT PRIMARY KEY,
     empID INT NOT NULL,
     CONSTRAINT nurseID FOREIGN KEY (empID) REFERENCES employee(id)
     ON DELETE CASCADE
@@ -33,7 +35,7 @@ CREATE TABLE nurse (
 );
 
 CREATE TABLE Sector (
-	id INT AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     sector_name VARCHAR(20) NOT NULL,
     manager_start_date DATE,
     manager INT,
@@ -41,7 +43,7 @@ CREATE TABLE Sector (
 );
 
 CREATE TABLE works_in (
-	emp_ID INT,
+    emp_ID INT,
     sector_ID INT,
     CONSTRAINT empFK FOREIGN KEY (emp_ID) REFERENCES employee(id),
     CONSTRAINT sectorFK FOREIGN KEY (sector_ID) REFERENCES Sector(id),
@@ -49,14 +51,14 @@ CREATE TABLE works_in (
 );
 
 CREATE TABLE shift (
-	employee INT PRIMARY KEY,
+    employee INT PRIMARY KEY,
     shift_start DATETIME NOT NULL,
     shift_end DATETIME NOT NULL,
     CONSTRAINT empShiftFK FOREIGN KEY (employee) REFERENCES employee(id)
 );
 
 CREATE TABLE screening (
-	patient INT,
+    patient INT,
     nurse_id INT,
     diagnosis VARCHAR(50),
     dateS DATE NOT NULL,
@@ -68,7 +70,7 @@ CREATE TABLE screening (
 );
 
 CREATE TABLE appointment (
-	patient INT,
+    patient INT,
     doctor INT,
     dateApt DATE,
     diagnosis VARCHAR(50) NOT NULL,
