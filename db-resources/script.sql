@@ -73,8 +73,6 @@ CREATE TABLE appointment (
     patient INT,
     doctor INT,
     dateApt DATE,
-    diagnosis VARCHAR(50) NOT NULL,
-    price FLOAT NOT NULL,
     CONSTRAINT patientFK FOREIGN KEY (patient) REFERENCES client(clientID),
     CONSTRAINT doctorAptFK FOREIGN KEY (doctor) REFERENCES doctor(CRM),
     CONSTRAINT aptPR PRIMARY KEY (patient, doctor, dateApt)
