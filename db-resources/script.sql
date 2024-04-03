@@ -7,7 +7,7 @@ CREATE TABLE employee (
     salary FLOAT NOT NULL,
     birthdate DATE NOT NULL,
     hiringdate DATE NOT NULL,
-    email VARCHAR(320) NOT NULL
+    phone VARCHAR(15) NOT NULL
 );
 
 CREATE TABLE client(
@@ -20,7 +20,7 @@ CREATE TABLE client(
 CREATE TABLE doctor (
     CRM INT PRIMARY KEY,
     specialty VARCHAR(20) NOT NULL,
-    empID INT NOT NULL,
+    empID INT,
     CONSTRAINT empID FOREIGN KEY (empID) REFERENCES employee(id)
     ON DELETE CASCADE
     ON UPDATE CASCADE
@@ -28,7 +28,7 @@ CREATE TABLE doctor (
 
 CREATE TABLE nurse (
     RN INT PRIMARY KEY,
-    empID INT NOT NULL,
+    empID INT,
     CONSTRAINT nurseID FOREIGN KEY (empID) REFERENCES employee(id)
     ON DELETE CASCADE
     ON UPDATE CASCADE
@@ -61,12 +61,12 @@ CREATE TABLE screening (
     patient INT,
     nurse_id INT,
     diagnosis VARCHAR(50),
-    dateS DATE NOT NULL,
+    date DATE,
     fowards_to INT,
     CONSTRAINT clientScreeningFK FOREIGN KEY (patient) REFERENCES client(clientID),
     CONSTRAINT nurseScreeningFK FOREIGN KEY (nurse_id) REFERENCES nurse(RN),
     CONSTRAINT fowardFK FOREIGN KEY (fowards_to) REFERENCES doctor(CRM),
-    CONSTRAINT screeningPR PRIMARY KEY (nurse_id,patient)
+    CONSTRAINT screeningPR PRIMARY KEY (nurse_id,patient, date)
 );
 
 CREATE TABLE appointment (
