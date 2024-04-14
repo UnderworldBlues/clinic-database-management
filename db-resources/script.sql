@@ -50,13 +50,6 @@ CREATE TABLE works_in (
     CONSTRAINT workPK PRIMARY KEY (emp_ID, sector_ID) 
 );
 
-CREATE TABLE shift (
-    employee INT PRIMARY KEY,
-    shift_start DATETIME NOT NULL,
-    shift_end DATETIME NOT NULL,
-    CONSTRAINT empShiftFK FOREIGN KEY (employee) REFERENCES employee(id)
-);
-
 CREATE TABLE screening (
     patient INT,
     nurse_id INT,
