@@ -2,207 +2,222 @@ package main
 
 import (
 	"database/sql"
-	"log"
 	"time"
 )
 
 // insertions
 
-func insertClient(c client, db *sql.DB) int {
+func insertClient(c client, db *sql.DB) (int, error) {
 	res, err := db.Exec("INSERT INTO client (clientName, phone, birthdate) VALUES (?, ?, ?)", c.name, c.phone, c.birthdate)
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
 	id, err := res.LastInsertId()
 	// check if the auto increment worked
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
 	// return the id
-	return int(id)
+	return int(id), nil
 }
 
-func insertDoctor(doc employee, db *sql.DB) int {
+func insertDoctor(doc employee, db *sql.DB) (int, error) {
 	currentTime := time.Now() // gets the date the doctor was hired
 	res, err := db.Exec("INSERT INTO employee (empName, phone, birthdate, hiringdate, salary) VALUES (?, ?, ?, ?, ?)", doc.name, doc.phone, doc.birthdate, currentTime.Format("2006-01-02"), doc.salary)
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
 
 	id, err := res.LastInsertId()
 
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
 	_, err = db.Exec("INSERT INTO doctor (empID, CRM, specialty) VALUES (?, ?, ?)", id, doc.CRM, doc.specialty)
 
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
 
 	// return the id
-	return int(id)
+	return int(id), nil
 
 }
 
-func insertNurse(nurse employee, db *sql.DB) int {
+func insertNurse(nurse employee, db *sql.DB) (int, error) {
 	currentTime := time.Now() // gets the date the nurse was hired
 	res, err := db.Exec("INSERT INTO employee (empName, phone, birthdate, hiringdate, salary) VALUES (?, ?, ?, ?, ?)", nurse.name, nurse.phone, nurse.birthdate, currentTime.Format("2006-01-02"), nurse.salary)
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
 
 	_, err = db.Exec("INSERT INTO nurse (empID, RN) VALUES (?, ?)", id, nurse.RN)
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
 
-	return int(id)
+	return int(id), nil
 }
 
 // creates a new tuple in the sector table
-func createSector(db *sql.DB, sectorName string) int {
+func createSector(db *sql.DB, sectorName string) (int, error) {
 	// manager is the doctor's CRM
 	res, err := db.Exec("INSERT INTO sector ( sector_name ) VALUES ( ? )", sectorName)
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
 
-	return int(id)
+	return int(id), nil
 
 }
 
 // assigns an employee to a sector
-func insertIntoSector(employee int, sectorID int, db *sql.DB) {
+func insertIntoSector(employee int, sectorID int, db *sql.DB) error {
 	_, err := db.Exec("INSERT INTO works_in (emp_ID, sector_ID) VALUES (?, ?)", employee, sectorID)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
 // inserts a new entry into the screening table
-func insertScreening(db *sql.DB, data screening) {
+func insertScreening(db *sql.DB, data screening) error {
 	// nurse id actually points to the nurse's RN that was a mistake on my part, my bad >w<
 	_, err := db.Exec("INSERT INTO screening (patient, nurse_id, date, diagnosis) VALUES (?, ?, ?, ?)", data.patient, data.nurse_id, data.date, data.diagnosis)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
 // inserts a new entry into the appointment table
-func insertAppointment(db *sql.DB, data appointment) {
+func insertAppointment(db *sql.DB, data appointment) error {
 	_, err := db.Exec("INSERT INTO appointment (patient, doctor, dateApt) VALUES (?, ?, ?)", data.patient, data.doctor, data.dateApt)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
 // updates
 
 // alters a screening tuple to add a doctor which the patient is fowarded to
-func updateScreening(db *sql.DB, doctor int, data screening) {
+func updateScreening(db *sql.DB, doctor int, data screening) error {
 	_, err := db.Exec("UPDATE screening SET fowards_to = ? WHERE nurse_id = ? AND patient = ? and date = ?", doctor, data.nurse_id, data.patient, data.date)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
 // inserts/alters the manager of a sector
-func updateSectorManager(db *sql.DB, sectorID int, managerCRM int) {
+func updateSectorManager(db *sql.DB, sectorID int, managerCRM int) error {
 	currentTime := time.Now()
 	_, err := db.Exec("UPDATE sector SET manager = ?, manager_start_date = ? WHERE id = ?", managerCRM, currentTime.Format("2006-01-02"), sectorID)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
-func updateClientName(db *sql.DB, c client, id int) {
+func updateClientName(db *sql.DB, c client, id int) error {
 	_, err := db.Exec("UPDATE client SET clientName = ? WHERE id = ?", c.name, id)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
-func updateClientPhone(db *sql.DB, c client, id int) {
+func updateClientPhone(db *sql.DB, c client, id int) error {
 	_, err := db.Exec("UPDATE client SET phone = ? WHERE clientID = ?", c.phone, id)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
-func updateEmployeeName(db *sql.DB, e employee, id int) {
+func updateEmployeeName(db *sql.DB, e employee, id int) error {
 	_, err := db.Exec("UPDATE employee SET empName = ? WHERE id = ?", e.name, id)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
-func updateEmployeeSalary(db *sql.DB, e employee, id int) {
+func updateEmployeeSalary(db *sql.DB, e employee, id int) error {
 	_, err := db.Exec("UPDATE employee SET salary = ? WHERE id = ?", e.salary, id)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
-func updateEmployeePhone(db *sql.DB, e employee, id int) {
+func updateEmployeePhone(db *sql.DB, e employee, id int) error {
 	_, err := db.Exec("UPDATE employee SET phone = ? WHERE id = ?", e.phone, id)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
-func updateDoctorSpecialty(db *sql.DB, specialty string, CRM int) {
+func updateDoctorSpecialty(db *sql.DB, specialty string, CRM int) error {
 	_, err := db.Exec("UPDATE doctor SET specialty = ? and CRM = ?", specialty, CRM)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
 // deletions
 
-func dropEmployee(db *sql.DB, id int) {
+func dropEmployee(db *sql.DB, id int) error {
 	_, err := db.Exec("DELETE FROM employee WHERE id =?", id)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
-func dropClient(db *sql.DB, id int) {
+func dropClient(db *sql.DB, id int) error {
 	_, err := db.Exec("DELETE FROM client WHERE clientID =?", id)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
-func dropAppointment(db *sql.DB, apt appointment) {
+func dropAppointment(db *sql.DB, apt appointment) error {
 	_, err := db.Exec("DELETE FROM appointment WHERE patient = ? and doctor = ? and dateApt = ?", apt.patient, apt.doctor, apt.dateApt)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
-func dropScreening(db *sql.DB, data screening) {
+func dropScreening(db *sql.DB, data screening) error {
 	_, err := db.Exec("DELETE FROM screening WHERE nurse_id = ? and patient = ? and date = ?", data.nurse_id, data.patient, data.date)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
-func dropSectorEmployee(db *sql.DB, id int, sectorID int) {
+func dropSectorEmployee(db *sql.DB, id int, sectorID int) error {
 	_, err := db.Exec("DELETE FROM works_in WHERE emp_ID = ? AND sector_ID = ?", id, sectorID)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
 //queries
